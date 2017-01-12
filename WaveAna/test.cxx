@@ -37,6 +37,15 @@ int main(int argc, char** argv){
 	std::cout<<__LINE__<<std::endl;
 	if (f) f->ls();
 	std::cout<<__LINE__<<std::endl;
+	TString a = "1+1";
+	TString b = "2";
+	if (a==b){
+		std::cout<<a<<"="<<b<<std::endl;
+	}
+	else{
+		std::cout<<a<<"!="<<b<<std::endl;
+		a=b;
+	}
 //	std::vector<int> * triggerNumber = 0;
 //	std::vector<std::string> * ostring = 0;
 //	TFile * f = new TFile("output.root","RECREATE");

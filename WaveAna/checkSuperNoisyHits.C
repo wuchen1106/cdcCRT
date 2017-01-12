@@ -3,12 +3,18 @@
 	chain->Add("../root/h_61.root");
 	int triggerNumber;
 	std::vector<double> * i_aa = 0;
+	std::vector<int> * i_peak = 0;
+	std::vector<int> * i_width = 0;
+	std::vector<int> * i_clk = 0;
 	std::vector<int> * i_np = 0;
 	std::vector<int> * i_layerID = 0;
 	std::vector<int> * i_wireID = 0;
 	chain->SetBranchAddress("triggerNumber",&triggerNumber);
 	chain->SetBranchAddress("aa",&i_aa);
+	chain->SetBranchAddress("peak",&i_peak);
 	chain->SetBranchAddress("np",&i_np);
+	chain->SetBranchAddress("width",&i_width);
+	chain->SetBranchAddress("clk",&i_clk);
 	chain->SetBranchAddress("layerID",&i_layerID);
 	chain->SetBranchAddress("wireID",&i_wireID);
 
@@ -59,7 +65,7 @@
 					else nNoisyHits2++;
 				}
 			}
-			if ((*i_aa)[iHit]>5000){
+			if ((*i_peak)[iHit]>400&&(*i_clk)[iHit]+(*i_width)[iHit]==32){
 				nLargeHits++;
 				if ((*i_wireID)[iHit]>100){
 					if ((*i_layerID)[iHit]==19) nLargeHits7++;
