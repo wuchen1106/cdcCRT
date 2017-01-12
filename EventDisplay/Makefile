@@ -34,6 +34,7 @@ LIBS += -pthread -lm -ldl -rdynamic
 PROJECT3 = h_display
 #PROJECT4 = i_display
 #PROJECT5 = t_display
+PROJECT6 = drawWaveform
 
 .PHONY: all
 all: $(PROJECT5) $(PROJECT4) $(PROJECT3) $(PROJECT2) $(PROJECT1) $(PROJECT6) $(PROJECT7) $(PROJECT8) $(PROJECT9) $(PROJECT10)

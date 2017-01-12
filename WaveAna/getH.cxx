@@ -20,6 +20,8 @@
 #define NCHS 48
 #define NCHT 384 // shall be consistant with the value set in getP
 #define NBD 8
+//#define NCHT 336 // shall be consistant with the value set in getP
+//#define NBD 7
 #define NLY 20
 //#define MIN_ADC 50
 //#define MAX_ADC 750
@@ -84,18 +86,15 @@ int main(int argc, char** argv){
 
 	//===================Get raw input ROOT file============================
 	TChain * c_raw = new TChain("tree","tree");
-	char inputName[384];
-	sprintf(inputName,"../root/run_%0.6d.root",runNo);
-	c_raw->Add(inputName);
+	c_raw->Add(Form("../root/run_%0.6d.root",runNo));
 	int adc[NCHT][NSAM];
 	c_raw->SetBranchAddress("adc",adc);
 
 	//===================Get peak input ROOT file============================
 	TChain * c_peak = new TChain("t","t");
-	sprintf(inputName,"../root/p_%d.root",runNo);
-	c_peak->Add(inputName);
+	c_peak->Add(Form("../root/p_%d.root",runNo));
 	std::vector<std::vector<int> > * i_tdc = 0;
-	std::vector<std::vector<int> > * i_peak = 0;
+	std::vector<std::vector<double> > * i_peak = 0;
 	std::vector<std::vector<int> > * i_clk = 0;
 	std::vector<std::vector<int> > * i_width = 0;
 	std::vector<std::vector<double> > * i_sum = 0;
@@ -176,7 +175,6 @@ int main(int argc, char** argv){
 	std::cout<<"runNo#"<<runNo<<": "<<gastype<<", "<<runGr<<", "<<duration<<", "<<HV<<" V, "<<durationTime<<"sec"<<std::endl;
 
 	//===================Prepare output ROOT file============================
-	char outputName[384];
 	int o_nHits; // number of hits in this event
 	int o_nLayers; // number of hitten layers in this event
 	std::vector<int> * o_layerID = 0;
@@ -186,13 +184,14 @@ int main(int argc, char** argv){
 	std::vector<int> * o_ip = 0; // The index of the peak chosen as main peak in this hit
 	std::vector<int> * o_clk = 0; // The index of the ADC sample corresponding to the TDC tag of the chosen peak.
 	std::vector<int> * o_width = 0; // width of the chosen peak
-	std::vector<int> * o_peak = 0; // ADC height (minus pedestal) of this chosen peak
-	std::vector<int> * o_ped = 0; // pedestal
+	std::vector<double> * o_peak = 0; // ADC height (minus pedestal) of this chosen peak
+	std::vector<double> * o_ped = 0; // pedestal
 	std::vector<double> * o_sum = 0; // ADC sum (minus pedestal) of this chosen peak
 	std::vector<double> * o_aa = 0; // ADC sum (minus pedestal) of all peaks in this hit
 	std::vector<double> * o_driftT = 0; // drift time of this hit
-	sprintf(outputName,("../root/h_%d."+suffix+"root").c_str(),runNo);
-	TFile * f = new TFile(outputName,"RECREATE");
+	std::vector<int> * o_bid = 0;
+	std::vector<int> * o_chid = 0;
+	TFile * f = new TFile(Form(("../root/h_%d."+suffix+"root").c_str(),runNo),"RECREATE");
 	TTree * t = new TTree("t","t");
 	t->Branch("triggerNumber",&triggerNumber);
 	t->Branch("nHits",&o_nHits);
@@ -209,6 +208,8 @@ int main(int argc, char** argv){
 	t->Branch("sum",&o_sum);
 	t->Branch("aa",&o_aa);
 	t->Branch("driftT",&o_driftT);
+	t->Branch("bid",&o_bid);
+	t->Branch("chid",&o_chid);
 
 	//===================Prepare Histograms============================
 	TCanvas * canvas;
@@ -373,7 +374,7 @@ int main(int argc, char** argv){
 		hbwf[i]->GetYaxis()->SetTitle("ADC");
 		//tdc
 		name = Form("hbtdc_%d",i);
-		hbtdc[i] = new TH1D(name,title,256,-1100,0);
+		hbtdc[i] = new TH1D(name,title,1100,-1100,0);
 		hbtdc[i]->GetXaxis()->SetTitle("TDC");
 		//adc sum
 		name = Form("hbas_%d",i);
@@ -441,11 +442,13 @@ int main(int argc, char** argv){
 		if(o_np==0) delete o_np; o_np = new std::vector<int>;
 		if(o_clk==0) delete o_clk; o_clk = new std::vector<int>;
 		if(o_width==0) delete o_width; o_width = new std::vector<int>;
-		if(o_peak==0) delete o_peak; o_peak = new std::vector<int>;
-		if(o_ped==0) delete o_ped; o_ped = new std::vector<int>;
+		if(o_peak==0) delete o_peak; o_peak = new std::vector<double>;
+		if(o_ped==0) delete o_ped; o_ped = new std::vector<double>;
 		if(o_sum==0) delete o_sum; o_sum = new std::vector<double>;
 		if(o_aa==0) delete o_aa; o_aa = new std::vector<double>;
 		if(o_driftT==0) delete o_driftT; o_driftT = new std::vector<double>;
+		if(o_bid==0) delete o_bid; o_bid = new std::vector<int>;
+		if(o_chid==0) delete o_chid; o_chid = new std::vector<int>;
 		for (int il = 0; il < NLY; il++){
 			layerhit[il] = false;
 		}
@@ -524,6 +527,8 @@ int main(int argc, char** argv){
 			o_ped->push_back((i_ped)[ch]);
 			o_sum->push_back((*i_sum)[ch][thepeak]);
 			o_aa->push_back(i_aa[ch]);
+			o_bid->push_back(ch/NCHS);
+			o_chid->push_back(ch%NCHS);
 		}
 		for (int il = 0; il < NLY; il++ ){
 			if (layerhit[il]) o_nLayers++;
@@ -540,7 +545,7 @@ int main(int argc, char** argv){
 	for (int i = 0; i<3; i++){
 		for (int j = 0; j<3; j++){
 			int index = j*3+i;
-			if (index==8) continue;
+			if (index==NBD) continue;
 			pad[index] = new TPad(Form("p%d_%d",i,j),Form("p%d_%d",i,j),1./3*i,0.95/3*(2-j),1./3*(i+1),0.95/3*(3-j));
 			pad[index]->Draw();
 			pad[index]->SetGridx(1);
@@ -562,7 +567,7 @@ int main(int argc, char** argv){
 	for (int i = 0; i<3; i++){
 		for (int j = 0; j<3; j++){
 			int index = j*3+i;
-			if (index==8) continue;
+			if (index==NBD) continue;
 			pad[index]->cd();
 			hbst[index]->Draw("COLZ");
 			line_ht[index]->SetX1(-1000);
@@ -585,7 +590,7 @@ int main(int argc, char** argv){
 	for (int i = 0; i<3; i++){
 		for (int j = 0; j<3; j++){
 			int index = j*3+i;
-			if (index==8) continue;
+			if (index==NBD) continue;
 			pad[index]->cd();
 			hbat[index]->Draw("COLZ");
 			line_ht[index]->SetX1(-1000);
@@ -608,7 +613,7 @@ int main(int argc, char** argv){
 	for (int i = 0; i<3; i++){
 		for (int j = 0; j<3; j++){
 			int index = j*3+i;
-			if (index==8) continue;
+			if (index==NBD) continue;
 			pad[index]->cd();
 			pad[index]->SetLogz(1);
 			hbwf[index]->Draw("COLZ");
@@ -633,7 +638,7 @@ int main(int argc, char** argv){
 	for (int i = 0; i<3; i++){
 		for (int j = 0; j<3; j++){
 			int index = j*3+i;
-			if (index==8) continue;
+			if (index==NBD) continue;
 			pad[index]->cd();
 			hbtdc[index]->Draw("");
 			int bd = index/48;
@@ -658,7 +663,7 @@ int main(int argc, char** argv){
 	for (int i = 0; i<3; i++){
 		for (int j = 0; j<3; j++){
 			int index = j*3+i;
-			if (index==8) continue;
+			if (index==NBD) continue;
 			pad[index]->cd();
 			pad[index]->SetLogy();
 			hbs[index]->Draw("");
@@ -683,7 +688,7 @@ int main(int argc, char** argv){
 	for (int i = 0; i<3; i++){
 		for (int j = 0; j<3; j++){
 			int index = j*3+i;
-			if (index==8) continue;
+			if (index==NBD) continue;
 			pad[index]->cd();
 			pad[index]->SetLogy();
 			hba[index]->Draw("");

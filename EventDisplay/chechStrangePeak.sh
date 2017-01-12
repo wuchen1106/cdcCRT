@@ -1,0 +1,35 @@
+#!/bin/bash
+
+./drawWaveform 61 18
+./drawWaveform 61 43
+./drawWaveform 61 47
+./drawWaveform 61 114
+./drawWaveform 61 123
+./drawWaveform 61 124
+./drawWaveform 61 135
+./drawWaveform 61 144
+./drawWaveform 61 148
+./drawWaveform 61 155
+./drawWaveform 61 169
+./drawWaveform 61 190
+./drawWaveform 61 201
+./drawWaveform 61 215
+./drawWaveform 61 224
+./drawWaveform 61 251
+mv *.pdf 61.first100/
+cp 61.first100/18.5.pdf strangePeakAt-647/
+cp 61.first100/43.4.pdf strangePeakAt-647/
+cp 61.first100/47.4.pdf strangePeakAt-647/
+cp 61.first100/114.4.pdf strangePeakAt-647/
+cp 61.first100/123.4.pdf strangePeakAt-647/
+cp 61.first100/124.4.pdf strangePeakAt-647/
+cp 61.first100/135.3.pdf strangePeakAt-647/
+cp 61.first100/144.1.pdf strangePeakAt-647/
+cp 61.first100/148.5.pdf strangePeakAt-647/
+cp 61.first100/155.4.pdf strangePeakAt-647/
+cp 61.first100/169.4.pdf strangePeakAt-647/
+cp 61.first100/190.5.pdf strangePeakAt-647/
+cp 61.first100/201.4.pdf strangePeakAt-647/
+cp 61.first100/215.4.pdf strangePeakAt-647/
+cp 61.first100/224.3.pdf strangePeakAt-647/
+cp 61.first100/251.4.pdf strangePeakAt-647/

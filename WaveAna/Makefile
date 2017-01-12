@@ -32,7 +32,6 @@ LIBS += -pthread -lm -ldl -rdynamic
 PROJECT1 = hitMap
 PROJECT2 = getP
 PROJECT3 = getH
-PROJECT4 = test
 
 .PHONY: all
 all: $(PROJECT5) $(PROJECT4) $(PROJECT3) $(PROJECT2) $(PROJECT1) $(PROJECT6) $(PROJECT7) $(PROJECT8) $(PROJECT9) $(PROJECT10)
